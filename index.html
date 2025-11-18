@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Anna, écrivez avec Ladybug!</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: black; /* fondo negro total */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    text-shadow: 2px 2px 0 #e60012;
+    margin-bottom: 20px;
+    user-select: none;
+  }
+
+  #lessonSelection, #gameContainer {
+    width: 100%;
+    max-width: 900px;
+  }
+
+  #lessonSelection button {
+    font-size: 1.5rem;
+    padding: 12px 24px;
+    margin: 10px;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    background: #e60012;
+    color: black;
+    font-weight: bold;
+    box-shadow: 2px 2px 6px #900;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  #lessonSelection button:hover {
+    background-color: black;
+    color: #e60012;
+  }
+
+  #gameContainer {
+    display: none;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+    color: white;
+  }
+
+  #topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #backToIndexBtn {
+    background: #e60012;
+    color: black;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 2px 2px 5px #900;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  #backToIndexBtn:hover {
+    background-color: black;
+    color: #e60012;
+  }
+
+  #progress {
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+
+  #mainGame {
+    display: flex;
+    margin-top: 20px;
+  }
+
+  #gameLeft {
+    flex: 1 1 60%;
+    padding-right: 20px;
+  }
+
+  #gameRight {
+    flex: 1 1 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #resultImage {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #e60012;
+    object-fit: contain;
+    display: none; /* Oculto hasta que se necesite */
+  }
+
+  #answerContainer {
+    position: relative;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  #answerInput {
+    font-size: 2.5rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    border: 3px solid #e60012;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    background: white;
+    color: black;
+    position: relative;
+    z-index: 2;
+    user-select: text;
+  }
+
+  #highlightedText {
+    font-size: 2.5rem;
+    font-family: Arial, sans-serif;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    width: 100%;
+    color: black;
+    z-index: 1;
+    user-select: none;
+    display: none;
+  }
+
+  #highlightedText .wrong {
+    color: red;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  #listenBtn {
+    margin-top: 20px;
+    background-color: #e60012;
+    border: none;
+    color: black;
+    font-size: 1.8rem;
+    padding: 12px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 1px 1px 5px #900;
+    user-select: none;
+  }
+  #listenBtn:active {
+    transform: scale(0.95);
+  }
+
+  #checkBtn {
+    margin-top: 15px;
+    background-color: #28a745;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    padding: 15px 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 1px 1px 7px #1a5e28;
+    user-select: none;
+  }
+  #checkBtn:active {
+    transform: scale(0.95);
+  }
+
+  #messageBox {
+    margin-top: 25px;
+    font-size: 3rem;
+    font-weight: 900;
+    text-align: center;
+    min-height: 70px;
+    user-select: none;
+    text-shadow: 2px 2px 3px black;
+  }
+  #messageBox.ok {
+    color: #28a745;
+  }
+  #messageBox.bad {
+    color: #dc3545;
+  }
+
+  #lifeBarContainer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+  }
+  #lifeLabel {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-right: 10px;
+    user-select: none;
+  }
+  #lifeBar {
+    flex-grow: 1;
+    height: 25px;
+    background: #444;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 0 5px #222;
+  }
+  #lifeFill {
+    height: 100%;
+    background-color: #28a745;
+    width: 100%;
+    transition: width 0.4s ease;
+  }
+    /* Estilos para el Teclado Virtual */
+  #virtualKeyboard {
+    width: 100%;
+    max-width: 900px; /* Igual que el contenedor del juego */
+    margin-top: 30px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 0 10px #e60012;
+  }
+
+  .keyboard-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  #virtualKeyboard button {
+    flex-grow: 1;
+    padding: 12px 0;
+    margin: 3px;
+    font-size: 1.4rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 2px solid #e60012;
+    background: white;
+    color: black;
+    cursor: pointer;
+    transition: background-color 0.1s;
+  }
+  #virtualKeyboard button:active {
+    background-color: #f0f0f0;
+    transform: scale(0.98);
+  }
+
+  .space-key {
+    flex-grow: 4;
+    font-size: 1.2rem !important;
+  }
+  .backspace-key {
+    flex-grow: 1.5;
+    background-color: #dc3545 !important; /* Rojo */
+    color: white !important;
+    border-color: #dc3545 !important;
+  }
+  .check-key {
+    flex-grow: 2;
+    background-color: #28a745 !important; /* Verde */
+    color: white !important;
+    border-color: #28a745 !important;
+  }
+  .special-row button {
+    font-size: 1.2rem; /* Acentos ligeramente más pequeños */
+    padding: 8px 0;
+    text-transform: none; /* Asegurar que los acentos no se transformen */
+  }
+</style>
+</head>
+<body>
+
+<h1>✨ Apprends à écrire avec Ladybug ! 🐞</h1>
+
+<div id="lessonSelection">
+  </div>
+
+<div id="gameContainer" role="main" aria-live="polite" aria-atomic="true" aria-relevant="text">
+  <div id="topBar">
+    <button id="backToIndexBtn" aria-label="Retour à la sélection des leçons">⬅ Retour</button>
+    <div id="progress" aria-live="polite"></div>
+  </div>
+
+  <div id="mainGame">
+    <div id="gameLeft">
+      <button id="listenBtn" aria-label="Écouter la prononciation du mot">🔊 Écouter</button>
+
+      <div id="answerContainer">
+        <input type="text" id="answerInput" autocomplete="off" spellcheck="false" placeholder="Écris le mot aquí..." aria-label="Zone de saisie du mot" />
+        <div id="highlightedText" aria-hidden="true"></div>
+      </div>
+
+      <button id="checkBtn" aria-label="Vérifier la réponse">Vérifier</button>
+
+      <div id="lifeBarContainer" aria-label="Barre de vie de Ladybug">
+        <span id="lifeLabel">Vie de Ladybug</span>
+        <div id="lifeBar" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="5" aria-live="polite">
+          <div id="lifeFill"></div>
+        </div>
+      </div>
+
+      <div id="messageBox" role="alert"></div>
+    </div>
+    <div id="gameRight">
+      <img id="resultImage" src="" alt="" aria-live="polite" />
+    </div>
+  </div>
+</div>
+
+<div id="virtualKeyboard">
+    <div class="keyboard-row">
+        <button data-key="a">a</button>
+        <button data-key="z">z</button>
+        <button data-key="e">e</button>
+        <button data-key="r">r</button>
+        <button data-key="t">t</button>
+        <button data-key="y">y</button>
+        <button data-key="u">u</button>
+        <button data-key="i">i</button>
+        <button data-key="o">o</button>
+        <button data-key="p">p</button>
+    </div>
+    <div class="keyboard-row">
+        <button data-key="q">q</button>
+        <button data-key="s">s</button>
+        <button data-key="d">d</button>
+        <button data-key="f">f</button>
+        <button data-key="g">g</button>
+        <button data-key="h">h</button>
+        <button data-key="j">j</button>
+        <button data-key="k">k</button>
+        <button data-key="l">l</button>
+        <button data-key="m">m</button>
+    </div>
+    <div class="keyboard-row special-row">
+        <button data-key="é">é</button>
+        <button data-key="è">è</button>
+        <button data-key="à">à</button>
+        <button data-key="ç">ç</button>
+        <button data-key="ù">ù</button>
+        <button data-key="ê">ê</button>
+        <button data-key="î">î</button>
+        <button data-key="ô">ô</button>
+        <button data-key="û">û</button>
+        <button data-key="w">w</button>
+        <button data-key="x">x</button>
+        <button data-key="c">c</button>
+        <button data-key="v">v</button>
+        <button data-key="b">b</button>
+        <button data-key="n">n</button>
+    </div>
+    <div class="keyboard-row bottom-row">
+        <button data-key="SPACE" class="space-key">espace</button>
+        <button data-key="BACKSPACE" class="backspace-key">⌫</button>
+        <button data-key="CHECK" class="check-key">Vérifier</button>
+    </div>
+</div>
+
+<script>
+  const lessons = {
+    1: {
+      words: [
+        "le naufragé",
+        "les environs",
+        "les animaux",
+        "un fruit",
+        "vaillant",
+        "déserte",
+        "sain et sauf",
+        "sauvage",
+        "exotique",
+        "réveller"
+      ],
+      path: "Leçon 1"
+    }
+  };
+
+  let currentLesson = null;
+  let currentWordIndex = 0;
+  let life = 5; // 5 = 100%, cada error quita 1 (20%)
+
+  const lessonSelection = document.getElementById('lessonSelection');
+  const gameContainer = document.getElementById('gameContainer');
+  const backToIndexBtn = document.getElementById('backToIndexBtn');
+  const progress = document.getElementById('progress');
+  const listenBtn = document.getElementById('listenBtn');
+  const answerInput = document.getElementById('answerInput');
+  const highlightedText = document.getElementById('highlightedText');
+  const checkBtn = document.getElementById('checkBtn');
+  const messageBox = document.getElementById('messageBox');
+  const resultImage = document.getElementById('resultImage');
+  const lifeFill = document.getElementById('lifeFill');
+  const lifeBar = document.getElementById('lifeBar');
+  
+  const virtualKeyboard = document.getElementById('virtualKeyboard');
+
+  // MODIFICACIONES DE AUDIO
+  const audioOk = new Audio('bien.mp3');
+  const audioBad = new Audio('mal.mp3');
+  const audioGagne = new Audio('gagne.mp3'); // Audio de victoria final
+  const audioPerdu = new Audio('perdu.mp3'); // Audio de derrota por vida cero
+
+  function createLessonButtons() {
+    lessonSelection.innerHTML = '';
+    for (const num in lessons) {
+      const btn = document.createElement('button');
+      btn.textContent = `Leçon ${num}`;
+      btn.dataset.lesson = num;
+      btn.addEventListener('click', () => startLesson(num));
+      lessonSelection.appendChild(btn);
+    }
+  }
+
+  function showLessonSelection() {
+    gameContainer.style.display = 'none';
+    lessonSelection.style.display = 'block';
+    messageBox.textContent = '';
+    resultImage.style.display = 'none';
+    resultImage.src = '';
+    answerInput.value = '';
+    highlightedText.style.display = 'none';
+    highlightedText.textContent = '';
+  }
+
+  function startLesson(lessonNum) {
+    currentLesson = lessons[lessonNum];
+    currentWordIndex = 0;
+    life = 5;
+    updateLifeBar();
+    lessonSelection.style.display = 'none';
+    gameContainer.style.display = 'block';
+    updateProgress();
+    messageBox.textContent = '';
+    resultImage.style.display = 'none';
+    resultImage.src = '';
+    answerInput.value = '';
+    highlightedText.style.display = 'none';
+    highlightedText.textContent = '';
+    answerInput.disabled = false;
+    checkBtn.disabled = false;
+    listenBtn.disabled = false;
+    answerInput.focus();
+  }
+
+  function updateProgress() {
+    if (!currentLesson) return;
+    progress.textContent = `Mot ${currentWordIndex + 1} sur ${currentLesson.words.length}`;
+  }
+
+  function playWordAudio() {
+    const word = currentLesson.words[currentWordIndex];
+    const audioPath = `${currentLesson.path}/${word}.mp3`;
+    const audio = new Audio(audioPath);
+    audio.play().catch(() => {
+      showMessage(`Audio introuvable : ${audioPath}`, 'bad');
+    });
+  }
+
+  function showMessage(text, type) {
+    messageBox.textContent = text;
+    messageBox.className = type === 'ok' ? 'ok' : 'bad';
+  }
+
+  function updateLifeBar() {
+    const percentage = (life / 5) * 100;
+    lifeFill.style.width = percentage + '%';
+    lifeBar.setAttribute('aria-valuenow', life);
+    if (percentage > 60) {
+      lifeFill.style.backgroundColor = '#28a745'; // verde
+    } else if (percentage > 30) {
+      lifeFill.style.backgroundColor = '#ffc107'; // amarillo
+    } else {
+      lifeFill.style.backgroundColor = '#dc3545'; // rojo
+    }
+  }
+
+  // Highlight only the incorrect letters after user clicks "Vérifier"
+  function highlightMistakes() {
+    const expected = currentLesson.words[currentWordIndex];
+    const typed = answerInput.value;
+
+    let html = '';
+    for (let i = 0; i < typed.length; i++) {
+      if (i >= expected.length || typed[i] !== expected[i]) {
+        html += `<span class="wrong">${typed[i]}</span>`;
+      } else {
+        html += typed[i];
+      }
+    }
+    highlightedText.innerHTML = html;
+    highlightedText.style.display = 'block';
+  }
+
+  function checkAnswer() {
+    const expected = currentLesson.words[currentWordIndex];
+    const typed = answerInput.value.normalize('NFC');
+
+    if (typed === expected.normalize('NFC')) {
+      audioOk.currentTime = 0;
+      audioOk.play().catch(() => {});
+      showMessage('Très bien ! ✅', 'ok');
+      
+      resultImage.src = 'ok.png';
+      resultImage.alt = 'Correct';
+      resultImage.style.display = 'block';
+      highlightedText.style.display = 'none';
+      
+      setTimeout(nextWord, 1500); 
+
+    } else {
+      life--;
+      updateLifeBar();
+      highlightMistakes();
+
+      if (life <= 0) {
+        audioPerdu.currentTime = 0;
+        audioPerdu.play().catch(() => {});
+        showMessage('Anna, Le Papillon a gagné ! 🦋', 'bad');
+        resultImage.src = 'Lepapillon.png';
+        resultImage.alt = 'Le Papillon';
+        resultImage.style.display = 'block';
+        answerInput.disabled = true;
+        checkBtn.disabled = true;
+        listenBtn.disabled = true;
+        highlightedText.style.display = 'none';
+      } else {
+        audioBad.currentTime = 0;
+        audioBad.play().catch(() => {});
+        showMessage('Incorrect. Réessaie.', 'bad');
+        resultImage.src = 'mal.png';
+        resultImage.alt = 'Incorrect';
+        resultImage.style.display = 'block';
+      }
+    }
+  }
+
+  function nextWord() {
+    if (life <= 0) return;
+    currentWordIndex++;
+    if (currentWordIndex >= currentLesson.words.length) {
+      if (life > 0) {
+        audioGagne.currentTime = 0;
+        audioGagne.play().catch(() => {});
+        showMessage('Anna, tu as sauvé Ladybug ! 🎉', 'ok');
+        
+        // MOSTRAR ANNA.JPG AL GANAR
+        resultImage.src = 'anna.jpg';
+        resultImage.alt = 'Anna a sauvé Ladybug';
+        resultImage.style.display = 'block';
+      }
+      answerInput.disabled = true;
+      checkBtn.disabled = true;
+      listenBtn.disabled = true;
+      highlightedText.style.display = 'none';
+      return;
+    }
+    updateProgress();
+    answerInput.value = '';
+    highlightedText.style.display = 'none';
+    messageBox.textContent = '';
+    resultImage.style.display = 'none';
+    resultImage.src = '';
+  }
+  
+  function handleVirtualKeyPress(event) {
+    const key = event.target.dataset.key;
+    if (!key || answerInput.disabled) return;
+
+    let currentValue = answerInput.value;
+    
+    // Limpiar destacados y mensajes al presionar una tecla
+    highlightedText.style.display = 'none';
+    resultImage.style.display = 'none';
+    messageBox.textContent = '';
+    
+    if (key === 'BACKSPACE') {
+      answerInput.value = currentValue.slice(0, -1);
+    } else if (key === 'SPACE') {
+      answerInput.value = currentValue + ' ';
+    } else if (key === 'CHECK') {
+      checkAnswer();
+    } else {
+      answerInput.value = currentValue + key;
+    }
+    answerInput.focus();
+  }
+
+
+  answerInput.addEventListener('input', () => {
+    highlightedText.style.display = 'none';
+    resultImage.style.display = 'none';
+    messageBox.textContent = '';
+  });
+
+  backToIndexBtn.addEventListener('click', showLessonSelection);
+  listenBtn.addEventListener('click', playWordAudio);
+  checkBtn.addEventListener('click', checkAnswer);
+  virtualKeyboard.addEventListener('click', handleVirtualKeyPress);
+
+  answerInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      checkAnswer();
+    }
+  });
+
+  createLessonButtons();
+  showLessonSelection();
+</script>
+
+</body>
+</html>
